@@ -14,6 +14,8 @@ int main(int argc, char **argv){
 
 //each process will have charge's number
  int charge=N/P;
+//each buffer recieve numbers 
+ int recv_buff[charge];
  
 //this is representitive process
  if(myid==0){
@@ -21,17 +23,17 @@ int main(int argc, char **argv){
   int buff[N];
   for(int i=0;i<N;i++)
     buff[i]=rand();
-//give each numbers to each process, include myid0 itself    
-  for(int p=0;p<P;i++){
+//give each numbers to each process, NOT include myid0 itself    
+  for(int p=1;p<P;i++){
    MPI_Send(&buff[p*charge], charge, MPI_INT, p, 0, MPI_COMM_WORLD);
   }
+  for(int i=0;i<charge;i++)
+   recv_buff[i]=buff[i];
  }
- 
-//each buffer recieve numbers 
- int recv_buff[charge];
- MPI_Recv(recv_buff, charge, MPI_INT, 0, 0, MPI_COMM_WORLD, NULL);
- 
- 
+ else{
+   MPI_Recv(recv_buff, charge, MPI_INT, 0, 0, MPI_COMM_WORLD, NULL);  
+ }
+
 //begin to measure time 
  MPI_Barrier(MPI_COMM_WORLD);
  double t1=MPI_Wtime();
