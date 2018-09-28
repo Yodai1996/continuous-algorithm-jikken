@@ -3,7 +3,8 @@
 #include<stdlib.h>
 #include<time.h>
 
-#define N 256
+#define N 1024
+#define P 128
 
 int main(int argc, char **argv){
  int myid, numproc;
@@ -11,40 +12,51 @@ int main(int argc, char **argv){
  MPI_Comm_size(MPI_COMM_WORLD, &numproc);
  MPI_Comm_rank(MPI_COMM_WORLD, &myid);
 
- int charge=N/128;
+//each process will have charge's number
+ int charge=N/P;
+ 
 //this is representitive process
  if(myid==0){
+//make random N numbers
   int buff[N];
   for(int i=0;i<N;i++)
     buff[i]=rand();
-
-  for(int i=0;i<N;i++){
-   MPI_Send(&send_number, 1, MPI_INT, myid+1, 0, MPI_COMM_WORLD);
+//give each numbers to each process, include myid0 itself    
+  for(int p=0;p<P;i++){
+   MPI_Send(&buff[p*charge], charge, MPI_INT, p, 0, MPI_COMM_WORLD);
   }
- }else{
-
-
-  MPI_Recv(&recv_data, 1, MPI_INT, myid-1, 0, MPI_COMM_WORLD, NULL);
-
  }
-
-
-
+ 
+//each buffer recieve numbers 
+ int recv_buff[charge];
+ MPI_Recv(recv_buff, charge, MPI_INT, 0, 0, MPI_COMM_WORLD, NULL);
+ 
+ 
+//begin to measure time 
  MPI_Barrier(MPI_COMM_WORLD);
  double t1=MPI_Wtime();
 
+ 
+ //bubble sort
+ for(int i=0;i<charge;i++){
+  for(int j=i;j<charge;j++){
+   if(j<i){
+    int k=recv_buff[i];
+    recv_buff[i]=recv_buff[j];
+    recv_buff[j]=k;
+   }
+  }
+ }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 
 
- if(myid%2==0){
-  int send_number=myid*2;
-  MPI_Send(&send_number, 1, MPI_INT, myid+1, 0, MPI_COMM_WORLD);
-  printf("[%d] sends MPI_INT %d\n", myid, send_number);
-}else{
-  int recv_data;
-  MPI_Recv(&recv_data, 1, MPI_INT, myid-1, 0, MPI_COMM_WORLD, NULL);
-  printf("[%d] recives MPI_INT %d\n", myid, recv_data);
-}
-
+//finish to measure time 
  MPI_Barrier(MPI_COMM_WORLD);
  double t2=MPI_Wtime();
  printf("%f", t2-t1);
