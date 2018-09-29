@@ -3,6 +3,7 @@
 #include<stdlib.h>
 #include<time.h>
 #include<limits.h>
+#include<assert.h>
 
 #define N 1024
 #define P 128
@@ -15,6 +16,8 @@ int main(int argc, char **argv){
  MPI_Comm_size(MPI_COMM_WORLD, &numproc);
  MPI_Comm_rank(MPI_COMM_WORLD, &myid);
 
+//just confirm that numproc is same to P 
+ assert(numproc==P);
 //each process will have charge's number
  int charge=N/P;
 //each buffer recieve numbers 
