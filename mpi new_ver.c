@@ -25,14 +25,15 @@ int main(int argc, char **argv){
  int recv_left=INT_MIN;
  int recv_right=INT_MAX;
  
-//this is representitive process
- if(myid==0){
 //make random N numbers
   int buff[N];
+ 
+//this is representitive process
+ if(myid==0){
   for(int i=0;i<N;i++)
     buff[i]=rand();
 //give each numbers to each process, NOT include myid0 itself    
-  for(int p=1;p<P;i++)
+  for(int p=1;p<P;p++)
    MPI_Send(&buff[p*charge], charge, MPI_INT, p, 0, MPI_COMM_WORLD);
   for(int i=0;i<charge;i++)
    recv_buff[i]=buff[i];
@@ -101,7 +102,7 @@ do{
  if(myid==0){
   for(int i=0;i<charge;i++)
    buff[i]=recv_buff[i];  
-  for(int p=1;p<P;i++)
+  for(int p=1;p<P;p++)
    MPI_Recv(&buff[p*charge], charge, MPI_INT, p, 0, MPI_COMM_WORLD, NULL); 
   for(int i=0;i<N;i++)
    printf("%d\n", buff[i]);
