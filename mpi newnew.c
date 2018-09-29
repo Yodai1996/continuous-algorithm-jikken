@@ -8,25 +8,23 @@
 #define N 1024
 #define P 128
 
-int count=0;
-
 int main(int argc, char **argv){
+ int *buff=malloc(N*sizeof(int));
+ int count=0;
  int myid, numproc;
+//under this multi_process 
  MPI_Init(&argc, &argv);
  MPI_Comm_size(MPI_COMM_WORLD, &numproc);
  MPI_Comm_rank(MPI_COMM_WORLD, &myid);
 
-//just confirm that numproc is same to P 
- assert(numproc==P);
 //each process will have charge's number
  int charge=N/P;
 //each buffer recieve numbers 
- int recv_buff[charge];
+ int *recv_buff=malloc(charge*sizeof(int));
  int recv_left=INT_MIN;
  int recv_right=INT_MAX;
  
 //make random N numbers
-  int buff[N];
  
 //this is representitive process
  if(myid==0){
@@ -46,7 +44,8 @@ int main(int argc, char **argv){
  double t1=MPI_Wtime();
 
 //iteral
-do{ 
+do{
+ MPI_Barrier(MPI_COMM_WORLD);  
  count=0;
  //bubble sort
  for(int i=0;i<charge;i++){
@@ -91,7 +90,6 @@ do{
   count++;
  }
  //wait for all processes
- MPI_Barrier(MPI_COMM_WORLD); 
 }while(count!=0); 
 
 //finish to measure time 
