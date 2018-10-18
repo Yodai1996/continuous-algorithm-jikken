@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <time.h>
+#include <omp.h>
 #define M 10
 
 int main(void)
@@ -31,12 +32,15 @@ int main(void)
 	
 	gettimeofday(&t0, NULL);
 	
+	
 	for(count=0;count<100;count+=2){
+		#pragma omp parallel for collapse(2)
 		for(i=1;i<M;i++)
 			for(j=1;j<M;j++){
 				odd[i][j]=(1-4*r)*even[i][j]+r*even[i+1][j]+r*even[i-1][j]+r*even[i][j+1]+r*even[i][j-1];
 			}
 		
+		#pragma omp parallel for collapse(2)
 		for(i=1;i<M;i++)
 			for(j=1;j<M;j++){
 				even[i][j]=(1-4*r)*odd[i][j]+r*odd[i+1][j]+r*odd[i-1][j]+r*odd[i][j+1]+r*odd[i][j-1];
