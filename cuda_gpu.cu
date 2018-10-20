@@ -7,8 +7,9 @@
 #define M 32 
 
 __global__
-void Calcu(float **od, float **ev)
+void Calcu(float **od, float **ev, size_t oddpitch, size_t evenpitch)
 {
+  //pitchの使い道がわからん。詰んだ。
   int i=blockIdx.x * blockDim.x + threadIdx.x;
   int j=blockIdx.y * blockDim.y + threadIdx.y;
         int count;
@@ -33,7 +34,8 @@ int main(void)
         float r=0.2;
         float even[M+1][M+1], odd[M+1][M+1];
         float time;
-        size_t pitch;
+        size_t oddpitch;
+        size_t evenpitch;
 
         float **ev;
         float **od;
@@ -55,23 +57,23 @@ int main(void)
                 odd[i][M]=0;
         }
 
-        cudaMallocPitch(ev, &pitch, (M+1)*sizeof(float), M+1);
-        cudaMallocPitch(od, &pitch, (M+1)*sizeof(float), M+1);
+        cudaMallocPitch(ev, &evenpitch, (M+1)*sizeof(float), M+1);
+        cudaMallocPitch(od, &oddpitch, (M+1)*sizeof(float), M+1);
    
-        cudaMemcpy2D(ev ,pitch ,even ,pitch, (M+1)*sizeof(float), M+1, cudaMemcpyHostToDevice);
-        cudaMemcpy2D(od ,pitch ,odd  ,pitch, (M+1)*sizeof(float), M+1, cudaMemcpyHostToDevice);
+        cudaMemcpy2D(ev ,evenpitch ,even ,(M+1)*sizeof(float), (M+1)*sizeof(float), M+1, cudaMemcpyHostToDevice);
+        cudaMemcpy2D(od ,oddpitch  ,odd  ,(M+1)*sizeof(float), (M+1)*sizeof(float), M+1, cudaMemcpyHostToDevice);
 
         dim3 threadPerBlock(32,32);
         dim3 numBlocks(M/threadPerBlock.x, M/threadPerBlock.y);
 
         gettimeofday(&t0, NULL);
 
-        Calcu<<<numBlocks, threadPerBlock>>>(od , ev);
+        Calcu<<<numBlocks, threadPerBlock>>>(od , ev, oddpitch, evenpitch);
 
         cudaDeviceSynchronize();
 
-        cudaMemcpy2D(even ,pitch ,ev ,pitch, (M+1)*sizeof(float), M+1, cudaMemcpyDeviceToHost);
-        cudaMemcpy2D(odd  ,pitch ,od ,pitch, (M+1)*sizeof(float), M+1, cudaMemcpyDeviceToHost);
+        cudaMemcpy2D(even ,(M+1)*sizeof(float) ,ev ,evenpitch, (M+1)*sizeof(float), M+1, cudaMemcpyDeviceToHost);
+        cudaMemcpy2D(odd  ,(M+1)*sizeof(float) ,od ,oddpitch , (M+1)*sizeof(float), M+1, cudaMemcpyDeviceToHost);
 
         gettimeofday(&t1, NULL);
 
