@@ -9,7 +9,7 @@
 __global__
 void Calcu(float *address, size_t pitch)
 {
-  //pitchの使い道がわからん。詰んだ。
+  //pitchの使い道を理解した。勝利。
   int i=blockIdx.x * blockDim.x + threadIdx.x;
   int j=blockIdx.y * blockDim.y + threadIdx.y;
   float up, down, left, right;
